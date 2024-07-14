@@ -1,0 +1,22 @@
+<html>
+    <head>
+        <title>SenseHaJo Coffee Maker</title>
+    </head>
+    <script>
+        var host = window.location.host;
+        var url = "ws://"+host+"/ws";
+        const exampleSocket = new WebSocket(url,"protocolOne",);
+        exampleSocket.onopen = (event) => {
+            exampleSocket.send("Here's some text that the server is urgently awaiting!");
+        };
+
+        // Listen for messages
+        exampleSocket.addEventListener("message", (event) => {
+            console.log("Message from server ", event.data);
+        });
+        
+    </script>
+    <body>
+        Needs more text here
+    </body>
+</html>
