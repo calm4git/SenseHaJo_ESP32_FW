@@ -13,6 +13,7 @@
 
 #include "WebService.hpp"
 #include "LittleFS.h"
+#include "../SenseHaJo/key_task/key_task.hpp"
 
 DNSServer dnsServer;
 AsyncWebServer server(80);
@@ -25,6 +26,17 @@ WebService::WebService(void){
 
 WebService::~WebService(){
     server.end();
+}
+
+void WebService::setup(){
+    KeyEvents[0].eventbit=0;
+    KeyEvents[0].taskhandle = RegisterKeyEventSource(this,Key::emKeyState::KeyState_Pressed, Key::emMachineKeys::OneCup,KeyEvents[0].eventbit);
+
+    KeyEvents[1].eventbit=1;
+    KeyEvents[1].taskhandle = RegisterKeyEventSource(this,Key::emKeyState::KeyState_Pressed, Key::emMachineKeys::TwoCups,KeyEvents[1].eventbit);
+
+    KeyEvents[2].eventbit=2;
+    KeyEvents[2].taskhandle = RegisterKeyEventSource(this,Key::emKeyState::KeyState_Pressed, Key::emMachineKeys::Power,KeyEvents[2].eventbit);
 }
 
 void WebService::FileNotFound(AsyncWebServerRequest *request ){
@@ -133,6 +145,8 @@ void WebService::WSonEvent(AsyncWebSocket * server, AsyncWebSocketClient * clien
                         data[len] = 0;
                         //os_printf("%s\n", (char*)data);
                         client->text("I got your text message");
+                        Serial.printf((char*)data);
+                        parseJson((uint8_t*)data,(uint32_t)info->len);
                     }break;
                     case WS_BINARY:{
                         for(size_t i=0; i < info->len; i++){
@@ -140,6 +154,8 @@ void WebService::WSonEvent(AsyncWebSocket * server, AsyncWebSocketClient * clien
                         }
                         //os_printf("\n");
                         client->binary("I got your binary message");
+                        Serial.printf((char*)data);
+                        parseJson((uint8_t*)data,(uint32_t)info->len);
                     }break;
 
                     case WS_DISCONNECT:{
@@ -184,8 +200,12 @@ void WebService::WSonEvent(AsyncWebSocket * server, AsyncWebSocketClient * clien
                         //os_printf("ws[%s][%u] %s-message end\n", server->url(), client->id(), (info->message_opcode == WS_TEXT)?"text":"binary");
                         if(info->message_opcode == WS_TEXT){
                             client->text("I got your text message");
+                            Serial.printf((char*)data);
+                            parseJson((uint8_t*)data,(uint32_t)info->len);
                         } else {
                             client->binary("I got your binary message");
+                            Serial.printf((char*)data);
+                            parseJson((uint8_t*)data,(uint32_t)info->len);
                         }
                     }
                 }
@@ -228,4 +248,49 @@ void WebService::loop(){
             }
         }
     }
+}
+
+void WebService::parseJson(uint8_t* data, uint32_t len){
+JsonDocument doc;
+
+DeserializationError error = deserializeJson(doc, data, len);
+
+if (error) {
+  Serial.print("deserializeJson() failed: ");
+  Serial.println(error.c_str());
+  return;
+}
+
+const char* component = doc["component"]; // "key"
+const char* item = doc["item"]; // "OneCup"
+const char* action = doc["action"]; // "pressed"
+
+    if(0==strncmp(component, "key", sizeof("key"))){
+        if(0==strncmp(item,"OneCup",sizeof("OneCup"))){
+            if(0==strncmp(action,"pressed",sizeof("pressed"))){
+                /* Signal event for key one */
+                Serial.printf("Found OneCup keypresse");
+                if(NULL != KeyEvents[0].taskhandle){
+                    xTaskNotify(KeyEvents[0].taskhandle,(1<<KeyEvents[0].eventbit),eSetBits);
+                }
+            }
+        } else if (0==strncmp(item,"TwoCups",sizeof("TwoCups"))){
+            if(0==strncmp(action,"pressed",sizeof("pressed"))){
+                /* Signal event for key one */
+                Serial.printf("Found TwoCups keypresse");
+                if(NULL != KeyEvents[1].taskhandle){
+                    xTaskNotify(KeyEvents[1].taskhandle,(1<<KeyEvents[1].eventbit),eSetBits);
+                }
+            }
+        } else if (0==strncmp(item,"Power",sizeof("Power"))){
+                /* Signal event for key one */
+                Serial.printf("Found Power keypresse");
+                if(NULL != KeyEvents[1].taskhandle){
+                    xTaskNotify(KeyEvents[1].taskhandle,(1<<KeyEvents[1].eventbit),eSetBits);
+                }
+        } else {
+            /* unsupported key */
+        }
+    }
+
 }

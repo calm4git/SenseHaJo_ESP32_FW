@@ -9,7 +9,8 @@
 void StartKeyTask(SenseEHajoGPIOPins* pins);
 bool RegisterForKeyEvent(xTaskHandle handle, Key::emKeyState Event, Key::emMachineKeys Key, uint32_t eventmask );
 bool UnRegisterForKeyEvent( xTaskHandle handle, Key::emKeyState Event, Key::emMachineKeys Key);
-
+xTaskHandle RegisterKeyEventSource(xTaskHandle handle, Key::emKeyState Event, Key::emMachineKeys Key, uint8_t eventbit );
+xTaskHandle UnregisterKeyEventSource(xTaskHandle handle, Key::emKeyState Event, Key::emMachineKeys Key, uint8_t eventbit );
 #endif
 
 

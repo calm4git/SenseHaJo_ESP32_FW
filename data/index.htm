@@ -1,22 +1,114 @@
 <html>
     <head>
         <title>SenseHaJo Coffee Maker</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="basic.css">
     </head>
     <script>
         var host = window.location.host;
         var url = "ws://"+host+"/ws";
-        const exampleSocket = new WebSocket(url,"protocolOne",);
-        exampleSocket.onopen = (event) => {
-            exampleSocket.send("Here's some text that the server is urgently awaiting!");
+        const remotesocket = new WebSocket(url,"protocolOne",);
+        remotesocket.onopen = (event) => {
+            console.log("WS connection established")
         };
 
         // Listen for messages
-        exampleSocket.addEventListener("message", (event) => {
+        remotesocket.addEventListener("message", (event) => {
             console.log("Message from server ", event.data);
+            processJSON(event.data);
         });
+
+    function onecup_click(){
+        var event = {
+            component:"key",
+            item:"OneCup",
+            action:"pressed"
+        };
+        sendObjectToCoffeeMaker(event);
         
+    }
+
+    function power_click(){
+        var btn = document.getElementById("powerbutton");
+        
+        return;
+
+        var event = {
+            component:"key",
+            item:"Power",
+            action:"pressed"
+        };
+        sendObjectToCoffeeMaker(event);
+    }
+
+    function twocups_click(){
+        var event = {
+            component:"key",
+            item:"TwoCups",
+            action:"pressed"
+        };
+        sendObjectToCoffeeMaker(event);
+    }
+
+    function sendObjectToCoffeeMaker(obj){
+        var json = JSON.stringify(obj);
+        if(remotesocket.readyState !== WebSocket.CLOSED){
+            remotesocket.send(json);
+        }
+    }
+
+    function processJSON(json){
+        try {
+            var data = JSON.parse(json);    
+        } catch (error) {
+            console.log("error: "+error);
+            return
+        }
+        /* get elements form coffeemaker */
+        
+
+    }
+
+    function toggleLED() {
+    const led = document.getElementById('led');
+    led.classList.toggle('on');
+    led.classList.toggle('off');
+    
+    }
+
     </script>
     <body>
-        Needs more text here
+        
+        <!-- <button onclick="onecup_click()"  >One Cup</button>
+        <button onclick="power_click()">Power</button>
+        <Button onclick="twocups_click()">Two Cups</Button>
+        <div id="led" class="led off"></div>
+        <button onclick="toggleLED()">LED Ein/Aus</button> -->
+       
+        <table>
+            <tr>
+                <td>
+                    <button class="coffee-button" onclick="onecup_click()">
+                        <span class="coffee-icon">☕</span>
+                    </button>
+                </td>
+                <td>
+                    <button class="coffee-button" onclick="twocups_click()">
+                        <span class="coffee-icon" >⏻</span>
+                    </button>   
+                </td>
+                <td>
+                    <button class="coffee-button" onclick="twocups_click()">
+                        <span class="coffee-icon" >☕☕</span>
+                    </button>            
+                </td>
+            </tr>
+        </table>
+        
+          
+          
+ 
+
     </body>
 </html>

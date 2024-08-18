@@ -11,14 +11,11 @@
 #include "SenseHaJo/sensehajo.h"
 
 
-
 ota updater;
 WiFiManager wm;
 WebService webservice;
 mqtt_client mqtt;
 led leds;
-
-
 void setup() {
   //Basic setup for hardware
   Serial.begin(115200);
@@ -43,7 +40,9 @@ void setup() {
   }
   /* If we are in config portal mode, we will start a second webserver instance on another port for WEB UI */ 
   sensehajo(&leds, &mqtt, &webservice);
-  
+  /* prepartion to track the runtime of our main loop */
+  pinMode(14,OUTPUT);
+  digitalWrite(14,LOW);
 }
 
 /* Loop inside the main task */

@@ -17,7 +17,7 @@ pinconfig_t pinconfig [pinname::PINNAME_CNT]={
     [HALSENSOR]= {.pin=21},
     [I2C_DISP_SCL] = {.pin=23},
     [I2C_DISP_SDA] = {.pin=22}, 
-    [ANALOG_IN] = {.pin=25}
+    [ANALOG_IN] = {.pin=36}
     /*, */
     /*
     [BL0937_CF1] = {.pin=35}, 

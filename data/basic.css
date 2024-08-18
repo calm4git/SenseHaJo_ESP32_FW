@@ -1,0 +1,43 @@
+.led {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: gray;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.led.on {
+    background-color: red;
+    box-shadow: 0 0 20px red;
+}
+
+.led.off {
+    background-color: gray;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+
+.coffee-button {
+    width: 100px;
+    height: 100px;
+    background-color: #34312f; 
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.coffee-button:hover {
+    background-color: #8b5e3c;
+    transform: scale(1.1);
+}
+
+.coffee-icon {
+    font-size: 36px;
+    color: white;
+}
