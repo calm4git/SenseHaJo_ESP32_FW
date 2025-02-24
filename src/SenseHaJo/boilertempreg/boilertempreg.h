@@ -3,6 +3,7 @@
 #else
     #if __has_include("freertos/ringbuf.h") 
     #include "freertos/ringbuf.h"
+        #define __useringbuf_h__
         #define BoilerTempQHandle_t RingbufHandle_t  
     #else
         #error "No MessageBuffer / RingBuffer defined "
@@ -21,4 +22,4 @@ float getBoilerTargetTemp();
 void setBoilerTargetTemp(float temp);
 float getBoilerCurrentTemp(void);
 void Boilertempreg_task(void* param);
-bool registerDataQueue(BoilerTempQHandle_t qhandle, uint32_t elementsize);
+bool BoilertempRegisterDataQueue(BoilerTempQHandle_t qhandle, uint32_t elementsize);

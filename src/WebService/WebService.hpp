@@ -9,6 +9,8 @@ class WebService {
         ~WebService();
         void setup();
         void loop();
+        void WebSocketUpdateBoilertemp(float value);
+        
 
     private:
         struct keyevent{
@@ -17,6 +19,9 @@ class WebService {
         };
         
         keyevent KeyEvents[3];
+        SemaphoreHandle_t mtxBoilertemp=NULL;
+        SemaphoreHandle_t semBoilertemp=NULL;
+        float Boilertemp=0;  
 
         bool started=false;
         void FileNotFound( AsyncWebServerRequest *request );
@@ -25,6 +30,9 @@ class WebService {
         void WSonEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
         void parseJson(uint8_t* data, uint32_t len);
         void emittKeyEvent(TaskHandle_t xHandle, uint8_t eventbit);
+        void WebSocketSendBoilertemp(float value);
+
+
 };
 
 #endif

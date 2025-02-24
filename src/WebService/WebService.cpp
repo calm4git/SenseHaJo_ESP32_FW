@@ -19,8 +19,10 @@ DNSServer dnsServer;
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
 
-WebService::WebService(void){
 
+
+WebService::WebService(void){
+    
 }
 
 
@@ -29,6 +31,8 @@ WebService::~WebService(){
 }
 
 void WebService::setup(){
+    mtxBoilertemp = xSemaphoreCreateMutex();
+    semBoilertemp = xSemaphoreCreateBinary();
     KeyEvents[0].eventbit=0;
     KeyEvents[0].taskhandle = RegisterKeyEventSource(this,Key::emKeyState::KeyState_Pressed, Key::emMachineKeys::OneCup,KeyEvents[0].eventbit);
 
@@ -238,6 +242,13 @@ void WebService::loop(){
             server.onNotFound(std::bind(&WebService::FileNotFound,this, std::placeholders::_1)); 
             server.begin();
 
+            if(pdTRUE ==xSemaphoreTake(semBoilertemp,0) ){
+                if( xSemaphoreTake( mtxBoilertemp, portMAX_DELAY )){
+                    float value = Boilertemp;
+                    xSemaphoreGive( mtxBoilertemp );
+                    WebSocketSendBoilertemp(value);
+                }
+            }
             lastrun=millis();
             this->started=true;
         } else {
@@ -291,6 +302,38 @@ const char* action = doc["action"]; // "pressed"
         } else {
             /* unsupported key */
         }
+    } else if( 0==strncmp(component, "settings", sizeof("settings"))){
+        if(0==strncmp(item,"targettemp",sizeof("targettemp"))){
+            if (0==strncmp(action,"set",sizeof("set"))){
+                /* set new temp */
+            }
+
+            if (0==strncmp(action,"get",sizeof("get"))){
+                /* set new temp */
+            }
+        }
+
     }
 
+}
+
+void WebService::WebSocketSendBoilertemp(float value){
+    JsonDocument doc;
+    String output;
+    doc["key"] = "boilertemp";
+    doc["value"] = value;
+    doc["unit"] = "°C";
+    doc.shrinkToFit();  // optional
+    serializeJson(doc, output);
+    ws.textAll(output);
+}
+
+void WebService::WebSocketUpdateBoilertemp(float value){
+    
+    if( xSemaphoreTake( mtxBoilertemp, 10 )){
+        Boilertemp=value;
+        xSemaphoreGive(semBoilertemp);
+        xSemaphoreGive( mtxBoilertemp );
+    }
+    
 }

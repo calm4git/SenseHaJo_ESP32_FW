@@ -38,6 +38,7 @@ void setup() {
   } else {
       Serial.println("Configportal running");
   }
+  webservice.setup();
   /* If we are in config portal mode, we will start a second webserver instance on another port for WEB UI */ 
   sensehajo(&leds, &mqtt, &webservice);
   /* prepartion to track the runtime of our main loop */

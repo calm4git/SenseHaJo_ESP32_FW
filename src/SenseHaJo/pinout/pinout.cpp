@@ -107,7 +107,7 @@ pinconfig_t pinconfig [pinname::PINNAME_CNT]={
     }
 
     void SenseEHajoAnalogIn::Setup(const std::vector<pinname>* pinsptr, emResolution resolution){
-          switch(resolution){
+        switch(resolution){
             case _9Bits:{
                 analogReadResolution(9);
             }break;

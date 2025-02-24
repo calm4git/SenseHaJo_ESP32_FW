@@ -29,7 +29,7 @@ void start_Boilertempreg(SenseEHajoGPIOPins* pptr, pinname p, pinname adcp){
     }
 }
 
-bool registerDataQueue(BoilerTempQHandle_t qhandle, uint32_t elementsize){
+bool BoilertempRegisterDataQueue(BoilerTempQHandle_t qhandle, uint32_t elementsize){
     bool registered=false;
     int32_t free_slot=-1;
     for(uint32_t i=0;i<( (sizeof(registeredQueus)/sizeof(registeredQueus[0]) ));i++ ){
@@ -70,19 +70,27 @@ void Boilertempreg_task(void* param){
         float temp = ntc.convertADCToTemperature(value.value);
         //printf("Analog temp: %f\r\n", temp);
         current_temp = temp;
-        if(targettemp>current_temp){
-            pinptr->SetPinStatus(pin,true);
-        } else {
+        if(boilertemplimits::emResult::overtemp == limit.checklimit(current_temp)){
+            /* shutdown boiler and throw error */
             pinptr->SetPinStatus(pin,false);
+        } else {
+            if(targettemp>current_temp){
+                pinptr->SetPinStatus(pin,true);
+            } else {
+                pinptr->SetPinStatus(pin,false);
+            }
         }
         tempdata_t data;
         data.value = current_temp;
+        
+        
+
         for(uint32_t i=0;i<( (sizeof(registeredQueus)/sizeof(registeredQueus[0]) ));i++ ){
             if(NULL!=registeredQueus[i]){
                 #ifdef __useringbuf_h__
                     UBaseType_t res =  xRingbufferSend(registeredQueus[i], &data, sizeof(data),0);
                     if (res != pdTRUE) { 
-
+                        Serial.printf("Faild to send temp: error %i\r\n",res);
                     }
                 #else
                     size_t byteswritten = xMessageBufferSend(registeredQueus[i],&data, sizeof(data),0);
@@ -91,6 +99,9 @@ void Boilertempreg_task(void* param){
                     }
                 #endif
             }
-        delay(100);      
+                  
+        }
+
+        delay(100);
     }
 }
